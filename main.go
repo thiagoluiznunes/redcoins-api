@@ -1,11 +1,17 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"rv-api/configs"
+
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
-	router := configs.InitRoutes()
+	db := configs.InitDataBase()
+	router := configs.InitRoutes(db)
 	http.ListenAndServe(":8000", router)
+	log.Fatal(http.ListenAndServe(":8000", router))
 }

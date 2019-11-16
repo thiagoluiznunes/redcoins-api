@@ -12,6 +12,9 @@ func init() {
 
 // GetUser : describe what this function does
 func GetUser(w http.ResponseWriter, r *http.Request) {
+	// rows, err := DB.Query("SELECT * FROM Users")
+	// defer rows.Close()
+
 	json.NewEncoder(w).Encode(`GET USER`)
 }
 
