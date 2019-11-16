@@ -2,7 +2,7 @@ package configs
 
 import (
 	"database/sql"
-	"rv-api/components/user"
+	"rv-api/internal/user"
 
 	"github.com/go-chi/chi"
 )
