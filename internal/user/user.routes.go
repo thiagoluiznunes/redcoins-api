@@ -7,12 +7,10 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// DB : database instance
-var DB *sql.DB
-
 // InitUserRoutes : init all routes from user component
 func InitUserRoutes(db *sql.DB, router *chi.Mux) {
 	DB = db
+	InitUserSchema()
 	fmt.Println("Init Users routes.")
 
 	router.Get("/user", GetUser)
