@@ -32,6 +32,7 @@ func InitDataBase() *sql.DB {
 	if err = db.Ping(); err != nil {
 		log.Panic(err)
 	}
+	// defer db.Close()
 
 	return db
 	// return &DataBase{conn: db}
