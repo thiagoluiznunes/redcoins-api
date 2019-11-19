@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 )
@@ -11,6 +12,7 @@ var DB *sql.DB
 
 // User : user model
 type User struct {
+	uuid     string
 	name     string
 	email    string
 	password string
@@ -20,7 +22,7 @@ type User struct {
 func InitUserSchema() {
 	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS Users (
-		uuid BINARY(16) NOT NULL,
+		uuid varchar(36) NOT NULL,
 		name varchar(100) NOT NULL,
 		email varchar(100) NOT NULL,
 		password varchar(100) NOT NULL,
@@ -33,22 +35,31 @@ func InitUserSchema() {
 }
 
 // CreateUserService : create user in database
-func CreateUserService(user User) (*User, error) {
-	var s sql.NullString
-	findUserQuery := fmt.Sprintf("SELECT * FROM Users WHERE email = '%s'", user.email)
-	err := DB.QueryRow(findUserQuery).Scan(&s)
+func CreateUserService(user User) (string, error) {
+	var email string
+	selectUserQuery := fmt.Sprintf("SELECT email FROM Users WHERE email = '%s'", user.email)
+	row := DB.QueryRow(selectUserQuery)
+	err := row.Scan(&email)
 
-	switch {
-	case err == sql.ErrNoRows:
-		log.Printf("User Not found.")
-		// createuserQuery := fmt.Sprintf(`
-		// 	INSERT INTO Users (uuid, name, email, password)
-		// 	VALUES (UUID_TO_BIN(UUID()), %s,	%s,	%s`, user.name, user.email, user.password)
+	if err == sql.ErrNoRows {
+		insertUserQuery := fmt.Sprintf(`
+		INSERT INTO Users (uuid, name, email, password)
+		VALUES (UUID(), '%s',	'%s',	'%s')`, user.name, user.email, user.password)
+		insert, err := DB.Query(insertUserQuery)
+		insert.Close()
 
-	case err != nil:
+		if err != nil {
+			panic(err.Error())
+		}
+		return "Token", nil
+	} else if err != nil {
 		log.Fatal(err)
-	default:
-		// do stuffs
+		return "", err
 	}
-	return nil, nil
+
+	if user.email != "" {
+		return "", errors.New("user: Already registered")
+	}
+
+	return "", errors.New("user: Not found")
 }

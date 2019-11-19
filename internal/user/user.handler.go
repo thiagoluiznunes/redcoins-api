@@ -7,16 +7,25 @@ import (
 	"regexp"
 )
 
+var nameRegex = regexp.MustCompile("^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$")
 var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 var passwordRegex = regexp.MustCompile("[a-zA-Z0-9]{6,}")
 
+// JSONResponseError : structure to classify JSON response error
+type JSONResponseError struct {
+	Code    int    `json:"status"`
+	Message string `json:"message"`
+}
+
 func init() {
-	fmt.Println("Init controller.")
+	fmt.Println("User: Init Handler.")
 }
 
 // GetUser : describe what this function does
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(`GET USER`)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode("res")
+	return
 }
 
 // CreateUser : describe what this function does
@@ -27,6 +36,10 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 	hashPassword, _ := HashPassword(password)
 
+	if !nameRegex.MatchString(name) {
+		json.NewEncoder(w).Encode("Invalid name!")
+		return
+	}
 	if !emailRegex.MatchString(email) {
 		json.NewEncoder(w).Encode("Invalid email!")
 		return
@@ -36,14 +49,21 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := User{name: name, email: email, password: hashPassword}
-	fmt.Println(user)
+	token, err := CreateUserService(User{
+		uuid:     ``,
+		name:     name,
+		email:    email,
+		password: hashPassword})
 
-	newUser, err := CreateUserService(user)
-	if err == nil {
-		json.NewEncoder(w).Encode(err)
+	fmt.Println(token)
+
+	if err != nil {
+		res := JSONResponseError{401, err.Error()}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 		return
 	}
-	json.NewEncoder(w).Encode(newUser)
+
 	return
 }
