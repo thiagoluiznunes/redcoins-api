@@ -14,5 +14,5 @@ func InitUserRoutes(db *sql.DB, router *chi.Mux) {
 	fmt.Println("Init Users routes.")
 
 	router.Get("/user", GetUser)
-	router.Post("/user", CreateUser)
+	router.Post("/signup", SingUp)
 }

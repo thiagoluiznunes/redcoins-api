@@ -28,8 +28,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// CreateUser : describe what this function does
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+// SingUp : describe what this function does
+func SingUp(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	name := r.Form.Get("name")
 	email := r.Form.Get("email")
@@ -49,21 +49,30 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := CreateUserService(User{
+	err := CreateUserService(User{
 		uuid:     ``,
 		name:     name,
 		email:    email,
 		password: hashPassword})
 
-	fmt.Println(token)
-
 	if err != nil {
-		res := JSONResponseError{401, err.Error()}
+		res := JSONResponseError{406, err.Error()}
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-
+	res := JSONResponseError{201, "User registered with success."}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
 	return
+}
+
+// Login : describe function
+func Login(w http.ResponseWriter, r *http.Request) {
+	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	// 	"uuid":     user.Username,
+	// 	"password": user.Password,
+	// })
+	// os.Getenv("JWT_SECRET")
 }

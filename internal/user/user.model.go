@@ -35,7 +35,7 @@ func InitUserSchema() {
 }
 
 // CreateUserService : create user in database
-func CreateUserService(user User) (string, error) {
+func CreateUserService(user User) error {
 	var email string
 	selectUserQuery := fmt.Sprintf("SELECT email FROM Users WHERE email = '%s'", user.email)
 	row := DB.QueryRow(selectUserQuery)
@@ -51,15 +51,16 @@ func CreateUserService(user User) (string, error) {
 		if err != nil {
 			panic(err.Error())
 		}
-		return "Token", nil
+		return nil
+
 	} else if err != nil {
 		log.Fatal(err)
-		return "", err
+		return err
 	}
 
 	if user.email != "" {
-		return "", errors.New("user: Already registered")
+		return errors.New("user: Already registered")
 	}
 
-	return "", errors.New("user: Not found")
+	return errors.New("user: Not found")
 }
