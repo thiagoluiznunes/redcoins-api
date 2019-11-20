@@ -21,12 +21,12 @@ type User struct {
 // InitUserSchema : init table
 func InitUserSchema() {
 	_, err := DB.Exec(`
-		CREATE TABLE IF NOT EXISTS Users (
-		uuid varchar(36) NOT NULL,
-		name varchar(100) NOT NULL,
-		email varchar(100) NOT NULL,
-		password varchar(100) NOT NULL,
-		PRIMARY KEY (uuid))
+		CREATE TABLE IF NOT EXISTS users (
+		uuid VARCHAR(36) NOT NULL UNIQUE,
+		name VARCHAR(50) NOT NULL,
+		email VARCHAR(50) NOT NULL UNIQUE,
+		password VARCHAR(36) NOT NULL,
+		CONSTRAINT pk_user_uuid PRIMARY KEY (uuid))
 		ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
 
 	if err != nil {
@@ -37,7 +37,7 @@ func InitUserSchema() {
 // CreateUser : create user in database
 func CreateUser(user User) error {
 	var email string
-	selectUserQuery := fmt.Sprintf("SELECT email FROM Users WHERE email = '%s'", user.email)
+	selectUserQuery := fmt.Sprintf("SELECT email FROM users WHERE email = '%s'", user.email)
 	row := DB.QueryRow(selectUserQuery)
 	err := row.Scan(&email)
 
@@ -69,7 +69,7 @@ func CreateUser(user User) error {
 func FindUserByEmail(email string) (User, error) {
 	var user User
 
-	selectUserQuery := fmt.Sprintf("SELECT * FROM Users WHERE email = '%s'", email)
+	selectUserQuery := fmt.Sprintf("SELECT * FROM users WHERE email = '%s'", email)
 	row := DB.QueryRow(selectUserQuery)
 	err := row.Scan(&user.uuid, &user.name, &user.email, &user.password)
 

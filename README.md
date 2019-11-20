@@ -1,1 +1,1 @@
-# rv-api
+# redcoins-api

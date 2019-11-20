@@ -2,7 +2,8 @@ package configs
 
 import (
 	"database/sql"
-	"rv-api/internal/user"
+	"redcoins-api/internal/operation"
+	"redcoins-api/internal/user"
 
 	"github.com/go-chi/chi"
 )
@@ -12,6 +13,7 @@ func InitRoutes(db *sql.DB) *chi.Mux {
 	router := chi.NewRouter()
 
 	user.InitUserRoutes(db, router)
+	operation.InitOperationRoutes(db, router)
 
 	return router
 }
