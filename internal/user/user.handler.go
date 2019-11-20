@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	hp "redcoins-api/internal"
 	"regexp"
 	"time"
 
@@ -15,18 +16,6 @@ var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 var nameRegex = regexp.MustCompile("^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$")
 var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 var passwordRegex = regexp.MustCompile("[a-zA-Z0-9]{6,}")
-
-// JSONStandardResponse : structure to classify JSON response
-type JSONStandardResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-// JSONJwtResponse : structure to classify JSON JWT response
-type JSONJwtResponse struct {
-	Code int    `json:"code"`
-	JWT  string `json:"jwt"`
-}
 
 // Claims : declares structure
 type Claims struct {
@@ -53,18 +42,24 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 	name := r.Form.Get("name")
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
-	hashPassword, _ := HashPassword(password)
+	hashPassword, _ := hp.HashPassword(password)
 
 	if !nameRegex.MatchString(name) {
-		json.NewEncoder(w).Encode("Invalid name!")
+		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid name."}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 	if !emailRegex.MatchString(email) {
-		json.NewEncoder(w).Encode("Invalid email!")
+		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid email."}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 	if !passwordRegex.MatchString(password) {
-		json.NewEncoder(w).Encode("Invalid password. Must have minimum 6 characters.")
+		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid password. Must have minimum 6 characters."}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 
@@ -75,13 +70,13 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 		password: hashPassword})
 
 	if err != nil {
-		res := JSONStandardResponse{406, err.Error()}
+		res := hp.JSONStandardResponse{Code: 406, Message: err.Error()}
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res := JSONStandardResponse{201, "User registered with success."}
+	res := hp.JSONStandardResponse{Code: 201, Message: "User registered with success."}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 	return
@@ -96,8 +91,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	user, _ = FindUserByEmail(email)
 
-	if !CheckPasswordHash(password, user.password) {
-		res := JSONStandardResponse{406, "Invalid email/password."}
+	if !hp.CheckPasswordHash(password, user.password) {
+		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid email/password."}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(res)
 		return
@@ -116,12 +111,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		res := JSONStandardResponse{500, "Internal error."}
+		res := hp.JSONStandardResponse{Code: 500, Message: "Internal error."}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res := JSONJwtResponse{200, tokenString}
+	res := hp.JSONJwtResponse{Code: 200, JWT: tokenString}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 	return

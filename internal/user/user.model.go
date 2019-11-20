@@ -23,9 +23,9 @@ func InitUserSchema() {
 	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
 		uuid VARCHAR(36) NOT NULL UNIQUE,
-		name VARCHAR(50) NOT NULL,
-		email VARCHAR(50) NOT NULL UNIQUE,
-		password VARCHAR(36) NOT NULL,
+		name VARCHAR(100) NOT NULL,
+		email VARCHAR(100) NOT NULL UNIQUE,
+		password VARCHAR(100) NOT NULL,
 		CONSTRAINT pk_user_uuid PRIMARY KEY (uuid))
 		ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
 
@@ -43,7 +43,7 @@ func CreateUser(user User) error {
 
 	if err == sql.ErrNoRows {
 		insertUserQuery := fmt.Sprintf(`
-		INSERT INTO Users (uuid, name, email, password)
+		INSERT INTO users (uuid, name, email, password)
 		VALUES (UUID(), '%s',	'%s',	'%s')`, user.name, user.email, user.password)
 		insert, err := DB.Query(insertUserQuery)
 		insert.Close()

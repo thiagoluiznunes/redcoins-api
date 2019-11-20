@@ -1,6 +1,9 @@
 package operation
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+)
 
 // DB : database instance
 var DB *sql.DB
@@ -9,7 +12,7 @@ var DB *sql.DB
 type Operation struct {
 	uuid          string
 	opertaionType string
-	amount        float32
+	amount        float64
 	userUUID      string
 }
 
@@ -28,4 +31,9 @@ func InitOperationSchema() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// CreateOperation : insert new operation in operations table
+func CreateOperation(operation Operation) error {
+	return errors.New("user: Not found")
 }

@@ -1,8 +1,20 @@
-package user
+package internal
 
 import (
 	"golang.org/x/crypto/bcrypt"
 )
+
+// JSONStandardResponse : structure to classify JSON response
+type JSONStandardResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+// JSONJwtResponse : structure to classify JSON JWT response
+type JSONJwtResponse struct {
+	Code int    `json:"code"`
+	JWT  string `json:"jwt"`
+}
 
 // HashPassword : return hash password
 func HashPassword(password string) (string, error) {
