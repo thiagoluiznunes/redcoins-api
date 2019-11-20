@@ -12,6 +12,7 @@ func InitOperationRoutes(db *sql.DB, router *chi.Mux) {
 	DB = db
 	InitOperationSchema()
 
+	// router.Use()
 	router.Post("/api/v1/operations", Create)
 
 	log.Println("operations: routes registered")

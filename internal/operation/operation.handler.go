@@ -17,6 +17,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if operationType != "purchase" && operationType != "sale" {
 		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid operation."}
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -24,6 +25,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid amount."}
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -39,11 +41,13 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		res := hp.JSONStandardResponse{Code: 406, Message: err.Error()}
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	json.NewEncoder(w).Encode("res")
 	return
 }

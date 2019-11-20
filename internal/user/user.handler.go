@@ -47,18 +47,21 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 	if !nameRegex.MatchString(name) {
 		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid name."}
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 	if !emailRegex.MatchString(email) {
 		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid email."}
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 	if !passwordRegex.MatchString(password) {
 		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid password. Must have minimum 6 characters."}
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -71,8 +74,8 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		res := hp.JSONStandardResponse{Code: 406, Message: err.Error()}
-
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -94,6 +97,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if !hp.CheckPasswordHash(password, user.password) {
 		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid email/password."}
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -113,11 +117,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		res := hp.JSONStandardResponse{Code: 500, Message: "Internal error."}
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(res.Code)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 	res := hp.JSONJwtResponse{Code: 200, JWT: tokenString}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(res.Code)
 	json.NewEncoder(w).Encode(res)
 	return
 }
