@@ -7,13 +7,16 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// InitOperationRoutes : init all routes from user component
-func InitOperationRoutes(db *sql.DB, router *chi.Mux) {
+// Routes : init all routes from user component
+func Routes(db *sql.DB) chi.Router {
 	DB = db
 	InitOperationSchema()
 
-	// router.Use()
-	router.Post("/api/v1/operations", Create)
+	router := chi.NewRouter()
+	// router.Use(hp.Autorize)
+	router.Post("/", Create)
 
 	log.Println("operations: routes registered")
+
+	return router
 }

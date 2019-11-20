@@ -5,18 +5,19 @@ import (
 	"log"
 
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 )
 
-// InitUserRoutes : init all routes from user component
-func InitUserRoutes(db *sql.DB, router *chi.Mux) {
+// Routes : init all routes from user component
+func Routes(db *sql.DB) chi.Router {
 	DB = db
 	InitUserSchema()
 
-	router.Use(middleware.Logger)
-	router.Get("/api/v1/user", GetUser)
-	router.Post("/api/v1/signup", SingUp)
-	router.Post("/api/v1/login", Login)
+	router := chi.NewRouter()
+	router.Get("/", GetUser)
+	router.Post("/signup", SingUp)
+	router.Post("/login", Login)
 
 	log.Println("users: routes registered")
+
+	return router
 }

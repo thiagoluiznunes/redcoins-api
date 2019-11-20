@@ -1,6 +1,10 @@
 package internal
 
 import (
+	"fmt"
+	"net/http"
+	"strings"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,6 +18,14 @@ type JSONStandardResponse struct {
 type JSONJwtResponse struct {
 	Code int    `json:"code"`
 	JWT  string `json:"jwt"`
+}
+
+func Autorize(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token := strings.Split(r.Header.Get("Authorization"), "Bearer")[1]
+		fmt.Println(token)
+		next.ServeHTTP(w, r)
+	})
 }
 
 // HashPassword : return hash password
