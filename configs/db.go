@@ -7,14 +7,8 @@ import (
 	"os"
 )
 
-// DataBase : database structure
-// type DataBase struct {
-// 	conn *sql.DB
-// }
-
-// InitDataBase : database structure
+// InitDataBase : init database connection
 func InitDataBase() *sql.DB {
-	fmt.Println("")
 	dbHost := os.Getenv("DB_HOST")
 	dbDialect := os.Getenv("DB_DIALECT")
 	dbName := os.Getenv("DB_NAME")
@@ -32,8 +26,8 @@ func InitDataBase() *sql.DB {
 	if err = db.Ping(); err != nil {
 		log.Panic(err)
 	}
-	// defer db.Close()
+
+	log.Println("database: connected")
 
 	return db
-	// return &DataBase{conn: db}
 }

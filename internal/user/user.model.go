@@ -34,8 +34,8 @@ func InitUserSchema() {
 	}
 }
 
-// CreateUserService : create user in database
-func CreateUserService(user User) error {
+// CreateUser : create user in database
+func CreateUser(user User) error {
 	var email string
 	selectUserQuery := fmt.Sprintf("SELECT email FROM Users WHERE email = '%s'", user.email)
 	row := DB.QueryRow(selectUserQuery)
@@ -63,4 +63,23 @@ func CreateUserService(user User) error {
 	}
 
 	return errors.New("user: Not found")
+}
+
+// FindUserByEmail : find user by email in database
+func FindUserByEmail(email string) (User, error) {
+	var user User
+
+	selectUserQuery := fmt.Sprintf("SELECT * FROM Users WHERE email = '%s'", email)
+	row := DB.QueryRow(selectUserQuery)
+	err := row.Scan(&user.uuid, &user.name, &user.email, &user.password)
+
+	if err == sql.ErrNoRows {
+		return user, errors.New("user: User not found")
+	} else if err != nil {
+		log.Fatal(err)
+		return user, err
+	} else if user.uuid != "" {
+		return user, nil
+	}
+	return user, errors.New("user: Not found")
 }

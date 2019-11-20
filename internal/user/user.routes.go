@@ -2,7 +2,7 @@ package user
 
 import (
 	"database/sql"
-	"fmt"
+	"log"
 
 	"github.com/go-chi/chi"
 )
@@ -11,8 +11,10 @@ import (
 func InitUserRoutes(db *sql.DB, router *chi.Mux) {
 	DB = db
 	InitUserSchema()
-	fmt.Println("Init Users routes.")
 
-	router.Get("/user", GetUser)
-	router.Post("/signup", SingUp)
+	router.Get("/api/v1/user", GetUser)
+	router.Post("/api/v1/signup", SingUp)
+	router.Post("/api/v1/login", Login)
+
+	log.Println("users: routes registered")
 }

@@ -1,9 +1,7 @@
 package configs
 
-import (
-	"fmt"
-)
+import "log"
 
 func init() {
-	fmt.Println("Init cors...")
+	log.Println("cors: apllied")
 }
