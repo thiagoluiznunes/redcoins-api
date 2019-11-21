@@ -48,13 +48,9 @@ func CheckPasswordHash(password string, hash string) bool {
 
 // ErrorsHandler : catch panic throwed
 func ErrorsHandler(w http.ResponseWriter, r *http.Request) {
-	if r := recover(); r != nil {
-		message := fmt.Sprintf("autorize: %v", r)
-		res := JSONStandardResponse{Code: 406, Message: message}
-		fmt.Println(r)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+	if rec := recover(); rec != nil {
+		message := fmt.Sprintf("autorize: %v", rec)
+		ResponseHandler(w, r, 406, message)
 		return
 	}
 }
@@ -66,10 +62,7 @@ func AutorizeMiddleware(next http.Handler) http.Handler {
 
 		header := r.Header.Get("Authorization")
 		if header == "" {
-			res := JSONStandardResponse{Code: 401, Message: "Unauthorized access."}
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(res.Code)
-			json.NewEncoder(w).Encode(res)
+			ResponseHandler(w, r, 401, "Unauthorized access.")
 			return
 		}
 
@@ -79,10 +72,7 @@ func AutorizeMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		res := JSONStandardResponse{Code: 401, Message: "Unauthorized access."}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		ResponseHandler(w, r, 401, "Unauthorized access.")
 		return
 	})
 }
@@ -98,9 +88,9 @@ func GenerateToken(uuid string, name string, email string) (string, error) {
 			ExpiresAt: expirationTime.Unix(),
 		},
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
-
 	if err != nil {
 		return "", err
 	}
@@ -121,4 +111,12 @@ func ValidateToken(token string) bool {
 		return false
 	}
 	return true
+}
+
+// ResponseHandler : handler
+func ResponseHandler(w http.ResponseWriter, r *http.Request, code int, message string) {
+	res := JSONStandardResponse{Code: code, Message: message}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(res.Code)
+	json.NewEncoder(w).Encode(res)
 }

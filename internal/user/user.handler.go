@@ -27,24 +27,15 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 	hashPassword, _ := hp.HashPassword(password)
 
 	if !nameRegex.MatchString(name) {
-		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid name."}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 406, "Invalid name.")
 		return
 	}
 	if !emailRegex.MatchString(email) {
-		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid email."}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 406, "Invalid email")
 		return
 	}
 	if !passwordRegex.MatchString(password) {
-		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid password. Must have minimum 6 characters."}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 406, "Invalid password. Must have minimum 6 characters.")
 		return
 	}
 
@@ -55,15 +46,10 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 		password: hashPassword})
 
 	if err != nil {
-		res := hp.JSONStandardResponse{Code: 406, Message: err.Error()}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 406, err.Error())
 		return
 	}
-	res := hp.JSONStandardResponse{Code: 201, Message: "User registered with success."}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	hp.ResponseHandler(w, r, 201, "User registered with success.")
 	return
 }
 
@@ -76,19 +62,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	user, _ = FindUserByEmail(email)
 	if !hp.CheckPasswordHash(password, user.password) {
-		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid email/password."}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 406, "Invalid email/password.")
 		return
 	}
 
 	token, err := hp.GenerateToken(user.uuid, user.name, user.email)
 	if err != nil {
-		res := hp.JSONStandardResponse{Code: 500, Message: "Internal error."}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 400, err.Error())
 		return
 	}
 	res := hp.JSONJwtResponse{Code: 200, JWT: token}
