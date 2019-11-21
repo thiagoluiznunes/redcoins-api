@@ -2,32 +2,14 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
 	hp "redcoins-api/internal"
 	"regexp"
-	"time"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
-var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 var nameRegex = regexp.MustCompile("^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$")
 var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 var passwordRegex = regexp.MustCompile("[a-zA-Z0-9]{6,}")
-
-// Claims : declares structure
-type Claims struct {
-	UUID  string `json:"uuid"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	jwt.StandardClaims
-}
-
-func init() {
-	fmt.Println("User: Init Handler.")
-}
 
 // GetUser : get user handler
 func GetUser(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +75,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 
 	user, _ = FindUserByEmail(email)
-
 	if !hp.CheckPasswordHash(password, user.password) {
 		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid email/password."}
 		w.Header().Set("Content-Type", "application/json")
@@ -102,18 +83,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &Claims{
-		UUID:  user.uuid,
-		Name:  user.name,
-		Email: user.email,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	token, err := hp.GenerateToken(user.uuid, user.name, user.email)
 	if err != nil {
 		res := hp.JSONStandardResponse{Code: 500, Message: "Internal error."}
 		w.Header().Set("Content-Type", "application/json")
@@ -121,7 +91,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res := hp.JSONJwtResponse{Code: 200, JWT: tokenString}
+	res := hp.JSONJwtResponse{Code: 200, JWT: token}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.Code)
 	json.NewEncoder(w).Encode(res)

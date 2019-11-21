@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 
+	hp "redcoins-api/internal"
+
 	"github.com/go-chi/chi"
 )
 
@@ -13,7 +15,7 @@ func Routes(db *sql.DB) chi.Router {
 	InitOperationSchema()
 
 	router := chi.NewRouter()
-	// router.Use(hp.Autorize)
+	router.Use(hp.AutorizeMiddleware)
 	router.Post("/", Create)
 
 	log.Println("operations: routes registered")

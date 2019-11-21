@@ -30,8 +30,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO : Validate request
-
 	err = CreateOperation(Operation{
 		uuid:          ``,
 		opertaionType: operationType,
