@@ -24,7 +24,6 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 	name := r.Form.Get("name")
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
-	hashPassword, _ := hp.HashPassword(password)
 
 	if !nameRegex.MatchString(name) {
 		hp.ResponseHandler(w, r, 406, "Invalid name.")
@@ -39,6 +38,7 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hashPassword, _ := hp.HashPassword(password)
 	err := CreateUser(User{
 		uuid:     ``,
 		name:     name,
@@ -55,12 +55,16 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 
 // Login : login user handler
 func Login(w http.ResponseWriter, r *http.Request) {
-	user := User{}
 	r.ParseForm()
 	email := r.Form.Get("email")
-	password := r.Form.Get("password")
 
-	user, _ = FindUserByEmail(email)
+	user, err := FindUserByEmail(email)
+	if err != nil {
+		hp.ResponseHandler(w, r, 406, "Invalid email/password.")
+		return
+	}
+
+	password := r.Form.Get("password")
 	if !hp.CheckPasswordHash(password, user.password) {
 		hp.ResponseHandler(w, r, 406, "Invalid email/password.")
 		return
