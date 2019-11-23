@@ -15,9 +15,13 @@ func InitDataBase() *sql.DB {
 	dbPort := os.Getenv("DB_PORT")
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
+	dbTimeZone := os.Getenv("DB_TIMEZONE")
 
-	url := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
+	url := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", dbUser, dbPass, dbHost, dbPort, dbName)
 	db, err := sql.Open(dbDialect, url)
+
+	timeZoneQuery := fmt.Sprintf("SET time_zone='%s';", dbTimeZone)
+	_, err = db.Exec(timeZoneQuery)
 
 	if err != nil {
 		log.Panic(err)
