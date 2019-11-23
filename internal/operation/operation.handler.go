@@ -16,18 +16,18 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	amount, err := strconv.ParseFloat(r.Form.Get("amount"), 64)
 
 	if operationType != "purchase" && operationType != "sale" {
-		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid operation."}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 406, "Invalid operation")
 		return
 	}
 
 	if err != nil {
-		res := hp.JSONStandardResponse{Code: 406, Message: "Invalid amount."}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 406, "Invalid amount")
+		return
+	}
+
+	price, err := hp.RequestBitCoinPrice()
+	if err != nil {
+		hp.ResponseHandler(w, r, 406, err.Error())
 		return
 	}
 
@@ -35,7 +35,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		uuid:          ``,
 		opertaionType: operationType,
 		amount:        amount,
-		price:         15.00,
+		price:         price,
 		userUUID:      uuid.(string)})
 
 	if err != nil {

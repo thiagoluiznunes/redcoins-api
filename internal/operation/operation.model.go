@@ -39,9 +39,12 @@ func InitOperationSchema() {
 
 // CreateOperation : insert new operation in operations table
 func CreateOperation(operation Operation) error {
+	fmt.Println(operation)
 	insertOperationQuery := fmt.Sprintf(`
-		INSERT INTO operations (uuid, operation_type, amount, user_uuid)
-		VALUES (UUID(), '%s',	'%f',	'%s');`, operation.opertaionType, operation.amount, operation.userUUID)
+		INSERT INTO operations (uuid, operation_type, amount, price, user_uuid)
+		VALUES (UUID(), '%s', '%f',	%f, '%s');`,
+		operation.opertaionType, operation.amount, operation.price, operation.userUUID)
+
 	insert, err := DB.Query(insertOperationQuery)
 	insert.Close()
 

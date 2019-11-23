@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -14,32 +17,6 @@ import (
 )
 
 var jwtKey = []byte(os.Getenv("JWT_SECRET"))
-
-// type contextKey string
-
-// func (c contextKey) String() string {
-// 	return string(c)
-// }
-
-// Claims : declares structure
-type Claims struct {
-	UUID  string `json:"uuid"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	jwt.StandardClaims
-}
-
-// JSONStandardResponse : structure to classify JSON response
-type JSONStandardResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-// JSONJwtResponse : structure to classify JSON JWT response
-type JSONJwtResponse struct {
-	Code int    `json:"code"`
-	JWT  string `json:"jwt"`
-}
 
 // HashPassword : return hash password
 func HashPassword(password string) (string, error) {
@@ -130,4 +107,41 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request, code int, message s
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.Code)
 	json.NewEncoder(w).Encode(res)
+}
+
+// RequestBitCoinPrice
+func RequestBitCoinPrice() (float64, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest", nil)
+	if err != nil {
+		log.Print(err)
+		os.Exit(1)
+	}
+
+	coinKey := os.Getenv("COIN_MARKET_KEY")
+
+	q := url.Values{}
+	q.Add("slug", "bitcoin")
+	q.Add("convert", "BRL")
+
+	req.Header.Set("Accepts", "application/json")
+	req.Header.Add("X-CMC_PRO_API_KEY", coinKey)
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request to server")
+		os.Exit(1)
+		return 0, err
+	}
+	respBody, _ := ioutil.ReadAll(resp.Body)
+
+	bytes := []byte(respBody)
+	var res JSONRequestCurrencyQuote
+	json.Unmarshal(bytes, &res)
+
+	if err != nil {
+		panic(err)
+	}
+	return res.Data.Num1.Quote.BRL.Price, nil
 }
