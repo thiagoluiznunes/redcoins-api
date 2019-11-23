@@ -11,6 +11,7 @@ import (
 // Create : get user handler
 func Create(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
+	uuid := r.Context().Value("uuid")
 	operationType := r.Form.Get("operation_type")
 	amount, err := strconv.ParseFloat(r.Form.Get("amount"), 64)
 
@@ -34,7 +35,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		uuid:          ``,
 		opertaionType: operationType,
 		amount:        amount,
-		userUUID:      "31c68ff7-0bc9-11ea-900c-9829a6e582d0"})
+		userUUID:      uuid.(string)})
 
 	if err != nil {
 		res := hp.JSONStandardResponse{Code: 406, Message: err.Error()}

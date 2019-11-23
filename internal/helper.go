@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,6 +14,12 @@ import (
 )
 
 var jwtKey = []byte(os.Getenv("JWT_SECRET"))
+
+// type contextKey string
+
+// func (c contextKey) String() string {
+// 	return string(c)
+// }
 
 // Claims : declares structure
 type Claims struct {
@@ -67,9 +74,12 @@ func AutorizeMiddleware(next http.Handler) http.Handler {
 		}
 
 		token := strings.Split(header, "Bearer")[1]
-		isValid := ValidateToken(strings.TrimSpace(token))
+		isValid, uuid := ValidateToken(strings.TrimSpace(token))
+
 		if isValid {
-			next.ServeHTTP(w, r)
+			ctx := context.WithValue(r.Context(), "uuid", uuid)
+			// ctx := context.WithValue(r.Context(), "uuid", uuid)
+			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
 		ResponseHandler(w, r, 401, "Unauthorized access.")
@@ -98,19 +108,20 @@ func GenerateToken(uuid string, name string, email string) (string, error) {
 }
 
 // ValidateToken : verify token validate
-func ValidateToken(token string) bool {
-	decode, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func ValidateToken(token string) (bool, string) {
+	decode, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 
+	claims := decode.Claims.(jwt.MapClaims)
 	if err != nil {
 		fmt.Println(err.Error())
-		return false
+		return false, ""
 	}
 	if !decode.Valid {
-		return false
+		return false, ""
 	}
-	return true
+	return true, claims["uuid"].(string)
 }
 
 // ResponseHandler : handler
