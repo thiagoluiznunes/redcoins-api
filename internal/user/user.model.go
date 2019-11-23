@@ -44,7 +44,7 @@ func CreateUser(user User) error {
 	if err == sql.ErrNoRows {
 		insertUserQuery := fmt.Sprintf(`
 		INSERT INTO users (uuid, name, email, password)
-		VALUES (UUID(), '%s',	'%s',	'%s')`, user.name, user.email, user.password)
+		VALUES (UUID(), '%s',	'%s',	'%s');`, user.name, user.email, user.password)
 		insert, err := DB.Query(insertUserQuery)
 		insert.Close()
 

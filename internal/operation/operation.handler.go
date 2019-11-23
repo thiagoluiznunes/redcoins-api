@@ -35,6 +35,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		uuid:          ``,
 		opertaionType: operationType,
 		amount:        amount,
+		price:         15.00,
 		userUUID:      uuid.(string)})
 
 	if err != nil {
