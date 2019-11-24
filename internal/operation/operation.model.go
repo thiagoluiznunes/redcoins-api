@@ -23,7 +23,7 @@ func InitOperationSchema() {
 	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS operations (
 		uuid VARCHAR(36) NOT NULL UNIQUE,
-		operation_type VARCHAR(36) NOT NULL,
+		operation_type ENUM('sale', 'purchase') NOT NULL,
 		amount DOUBLE NOT NULL,
 		prince DOUBLE NOT NULL,
 		creat_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
