@@ -25,7 +25,7 @@ func InitOperationSchema() {
 		uuid VARCHAR(36) NOT NULL UNIQUE,
 		operation_type ENUM('sale', 'purchase') NOT NULL,
 		amount DOUBLE NOT NULL,
-		prince DOUBLE NOT NULL,
+		price DOUBLE NOT NULL,
 		creat_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		user_uuid VARCHAR(36) NOT NULL,
 		CONSTRAINT pk_uuid PRIMARY KEY (uuid),

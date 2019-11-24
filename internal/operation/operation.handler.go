@@ -1,7 +1,6 @@
 package operation
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -39,15 +38,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		userUUID:      uuid.(string)})
 
 	if err != nil {
-		res := hp.JSONStandardResponse{Code: 406, Message: err.Error()}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(res.Code)
-		json.NewEncoder(w).Encode(res)
+		hp.ResponseHandler(w, r, 406, err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode("res")
+	hp.ResponseHandler(w, r, 200, "Operation successfully performed.")
 	return
 }
