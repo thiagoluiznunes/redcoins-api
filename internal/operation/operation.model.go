@@ -3,7 +3,6 @@ package operation
 import (
 	"database/sql"
 	"fmt"
-	"log"
 )
 
 // DB : database instance
@@ -45,30 +44,27 @@ func InitOperationSchema() {
 }
 
 // CreateOperation : insert new operation in operations table
-func CreateOperation(operation Operation) error {
+func CreateOperation(opt Operation) error {
 	insertOperationQuery := fmt.Sprintf(`
-		INSERT INTO operations (uuid, operation_type, amount, price, user_uuid)
-		VALUES (UUID(), '%s', '%f',	%f, '%s');`,
-		operation.OperationType, operation.Amount, operation.Price, operation.UserUUID)
+		INSERT INTO operations (uuid,	operation_type,	amount,	price,user_uuid)
+		VALUES (UUID(),	'%s',	%f,	%f,	'%s');`, opt.OperationType, opt.Amount, opt.Price, opt.UserUUID)
 
 	insert, err := DB.Query(insertOperationQuery)
 	insert.Close()
 
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	return nil
 }
 
-// GetOperations : select all operations by user_uuid
-func GetOperations(uuid string) ([]Operation, error) {
+// GetOperationsByUser : select all operations by user_uuid
+func GetOperationsByUser(uuid string) ([]Operation, error) {
 	operations := []Operation{}
-	getOperationQuery := fmt.Sprintf(` SELECT * FROM operations WHERE user_uuid = '%s';`, uuid)
-	rows, err := DB.Query(getOperationQuery)
+	getOperationsQuery := fmt.Sprintf(`SELECT *	FROM operations	WHERE user_uuid = '%s';`, uuid)
+	rows, err := DB.Query(getOperationsQuery)
 
 	if err != nil {
-		log.Fatal(err)
 		return operations, err
 	}
 	defer rows.Close()
@@ -76,13 +72,39 @@ func GetOperations(uuid string) ([]Operation, error) {
 	for rows.Next() {
 		var opt Operation
 		if err := rows.Scan(&opt.UUID, &opt.OperationType, &opt.Amount, &opt.Price, &opt.CreatedAt, &opt.UserUUID); err != nil {
-			log.Fatal(err)
+			return operations, err
 		}
 		operations = append(operations, opt)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Fatal(err)
+		return operations, err
+	}
+	return operations, nil
+}
+
+// GetOperationsByDate : select all operations by user_uuid
+func GetOperationsByDate(date string) ([]Operation, error) {
+	operations := []Operation{}
+	getOperationsQuery := fmt.Sprintf(`
+		SELECT * FROM operations
+		WHERE created_at >= '%s 00:00:00' AND created_at <='%s 23:59:59';`, date, date)
+
+	rows, err := DB.Query(getOperationsQuery)
+	if err != nil {
+		return operations, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var opt Operation
+		if err := rows.Scan(&opt.UUID, &opt.OperationType, &opt.Amount, &opt.Price, &opt.CreatedAt, &opt.UserUUID); err != nil {
+			return operations, err
+		}
+		operations = append(operations, opt)
+	}
+
+	if err := rows.Err(); err != nil {
 		return operations, err
 	}
 	return operations, nil

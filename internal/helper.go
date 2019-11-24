@@ -79,7 +79,7 @@ func GenerateToken(uuid string, name string, email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		return "", err
+		return err.Error(), err
 	}
 	return tokenString, nil
 }
@@ -92,11 +92,10 @@ func ValidateToken(token string) (bool, string) {
 
 	claims := decode.Claims.(jwt.MapClaims)
 	if err != nil {
-		fmt.Println(err.Error())
-		return false, ""
+		return false, err.Error()
 	}
 	if !decode.Valid {
-		return false, ""
+		return false, err.Error()
 	}
 	return true, claims["uuid"].(string)
 }
@@ -130,7 +129,6 @@ func RequestBitCoinPrice() (float64, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error sending request to server")
 		os.Exit(1)
 		return 0, err
 	}
@@ -141,7 +139,7 @@ func RequestBitCoinPrice() (float64, error) {
 	json.Unmarshal(bytes, &res)
 
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	return res.Data.Num1.Quote.BRL.Price, nil
 }

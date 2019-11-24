@@ -7,6 +7,8 @@ import (
 	"strconv"
 
 	hp "redcoins-api/internal"
+
+	"github.com/go-chi/chi"
 )
 
 // Create : get user handler
@@ -49,13 +51,46 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// Get : get all operations handler
-func Get(w http.ResponseWriter, r *http.Request) {
+// GetByUser :  get operationsByUser handler
+func GetByUser(w http.ResponseWriter, r *http.Request) {
 	userUUID := r.Context().Value("uuid")
 
-	operations, err := GetOperations(userUUID.(string))
+	operations, err := GetOperationsByUser(userUUID.(string))
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, err.Error())
+		return
+	}
+
+	if len(operations) <= 0 {
+		hp.ResponseHandler(w, r, 404, "Operations not found")
+		return
+	}
+
+	res := JSONOperationsResponse{Code: 200, Operations: operations}
+	var jsonData []byte
+	jsonData, err = json.Marshal(res)
+
+	if err != nil {
+		log.Println(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(res.Code)
+	w.Write(jsonData)
+	return
+}
+
+// GetByDate :  get operationsByDate handler
+func GetByDate(w http.ResponseWriter, r *http.Request) {
+	date := chi.URLParam(r, "date")
+
+	operations, err := GetOperationsByDate(date)
+	if err != nil {
+		hp.ResponseHandler(w, r, 406, err.Error())
+		return
+	}
+
+	if len(operations) <= 0 {
+		hp.ResponseHandler(w, r, 404, "Operations not found")
 		return
 	}
 

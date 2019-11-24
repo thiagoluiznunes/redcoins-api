@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 )
 
 // DB : database instance
@@ -43,25 +42,23 @@ func CreateUser(user User) error {
 
 	if err == sql.ErrNoRows {
 		insertUserQuery := fmt.Sprintf(`
-		INSERT INTO users (uuid, name, email, password)
-		VALUES (UUID(), '%s',	'%s',	'%s');`, user.name, user.email, user.password)
+			INSERT INTO users (uuid, name, email, password)
+			VALUES (UUID(), '%s', '%s', '%s');`, user.name, user.email, user.password)
+
 		insert, err := DB.Query(insertUserQuery)
 		insert.Close()
 
 		if err != nil {
-			panic(err.Error())
+			return err
 		}
 		return nil
-
 	} else if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	if user.email != "" {
 		return errors.New("user: Already registered")
 	}
-
 	return errors.New("user: Not found")
 }
 
@@ -69,14 +66,14 @@ func CreateUser(user User) error {
 func FindUserByEmail(email string) (User, error) {
 	var user User
 
-	selectUserQuery := fmt.Sprintf("SELECT * FROM users WHERE email = '%s'", email)
+	selectUserQuery := fmt.Sprintf(`SELECT * FROM users	WHERE email = '%s'`, email)
+
 	row := DB.QueryRow(selectUserQuery)
 	err := row.Scan(&user.uuid, &user.name, &user.email, &user.password)
 
 	if err == sql.ErrNoRows {
 		return user, errors.New("user: User not found")
 	} else if err != nil {
-		log.Fatal(err)
 		return user, err
 	} else if user.uuid != "" {
 		return user, nil
