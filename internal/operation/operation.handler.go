@@ -1,6 +1,8 @@
 package operation
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -10,7 +12,7 @@ import (
 // Create : get user handler
 func Create(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	uuid := r.Context().Value("uuid")
+	userUUID := r.Context().Value("uuid")
 	operationType := r.Form.Get("operation_type")
 	amount, err := strconv.ParseFloat(r.Form.Get("amount"), 64)
 
@@ -19,7 +21,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err != nil {
+	if err != nil || amount <= 0 {
 		hp.ResponseHandler(w, r, 406, "Invalid amount")
 		return
 	}
@@ -31,11 +33,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = CreateOperation(Operation{
-		uuid:          ``,
-		opertaionType: operationType,
-		amount:        amount,
-		price:         price,
-		userUUID:      uuid.(string)})
+		UUID:          ``,
+		OperationType: operationType,
+		Amount:        amount,
+		Price:         price,
+		CreatedAt:     ``,
+		UserUUID:      userUUID.(string)})
 
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, err.Error())
@@ -43,5 +46,28 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hp.ResponseHandler(w, r, 200, "Operation successfully performed.")
+	return
+}
+
+// Get : get all operations handler
+func Get(w http.ResponseWriter, r *http.Request) {
+	userUUID := r.Context().Value("uuid")
+
+	operations, err := GetOperations(userUUID.(string))
+	if err != nil {
+		hp.ResponseHandler(w, r, 406, err.Error())
+		return
+	}
+
+	res := JSONOperationsResponse{Code: 200, Operations: operations}
+	var jsonData []byte
+	jsonData, err = json.Marshal(res)
+
+	if err != nil {
+		log.Println(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(res.Code)
+	w.Write(jsonData)
 	return
 }
