@@ -3,6 +3,7 @@ package user
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	hp "redcoins-api/internal"
 	"regexp"
 )
@@ -11,19 +12,13 @@ var nameRegex = regexp.MustCompile("^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$")
 var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 var passwordRegex = regexp.MustCompile("[a-zA-Z0-9]{6,}")
 
-// GetUser : get user handler
-func GetUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode("res")
-	return
-}
-
 // SingUp : singup user handler
 func SingUp(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	name := r.Form.Get("name")
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
+	secret := r.Form.Get("secret")
 
 	if !nameRegex.MatchString(name) {
 		hp.ResponseHandler(w, r, 406, "Invalid name.")
@@ -38,12 +33,17 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hashPassword, _ := hp.HashPassword(password)
-	err := CreateUser(User{
+	hashPassword, err := hp.HashPassword(password)
+	role := "user"
+	if secret == os.Getenv("JWT_SECRET") {
+		role = "admin"
+	}
+	err = CreateUser(User{
 		uuid:     ``,
 		name:     name,
 		email:    email,
-		password: hashPassword})
+		password: hashPassword,
+		role:     role})
 
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, err.Error())
@@ -70,7 +70,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := hp.GenerateToken(user.uuid, user.name, user.email)
+	token, err := hp.GenerateToken(user.uuid, user.name, user.email, user.role)
 	if err != nil {
 		hp.ResponseHandler(w, r, 400, err.Error())
 		return

@@ -15,6 +15,7 @@ type User struct {
 	name     string
 	email    string
 	password string
+	role     string
 }
 
 // InitUserSchema : init table
@@ -25,6 +26,7 @@ func InitUserSchema() {
 		name VARCHAR(100) NOT NULL,
 		email VARCHAR(100) NOT NULL UNIQUE,
 		password VARCHAR(100) NOT NULL,
+		role ENUM ('admin', 'user') NOT NULL DEFAULT 'user',
 		CONSTRAINT pk_user_uuid PRIMARY KEY (uuid))
 		ENGINE=InnoDB DEFAULT CHARSET=utf8;`)
 
@@ -42,8 +44,8 @@ func CreateUser(user User) error {
 
 	if err == sql.ErrNoRows {
 		insertUserQuery := fmt.Sprintf(`
-			INSERT INTO users (uuid, name, email, password)
-			VALUES (UUID(), '%s', '%s', '%s');`, user.name, user.email, user.password)
+			INSERT INTO users (uuid, name, email, password, role)
+			VALUES (UUID(), '%s', '%s', '%s', '%s');`, user.name, user.email, user.password, user.role)
 
 		insert, err := DB.Query(insertUserQuery)
 		insert.Close()
@@ -69,7 +71,7 @@ func FindUserByEmail(email string) (User, error) {
 	selectUserQuery := fmt.Sprintf(`SELECT * FROM users	WHERE email = '%s'`, email)
 
 	row := DB.QueryRow(selectUserQuery)
-	err := row.Scan(&user.uuid, &user.name, &user.email, &user.password)
+	err := row.Scan(&user.uuid, &user.name, &user.email, &user.password, &user.role)
 
 	if err == sql.ErrNoRows {
 		return user, errors.New("user: User not found")

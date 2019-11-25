@@ -65,12 +65,13 @@ func AutorizeMiddleware(next http.Handler) http.Handler {
 }
 
 // GenerateToken : create token
-func GenerateToken(uuid string, name string, email string) (string, error) {
+func GenerateToken(uuid string, name string, email string, role string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		UUID:  uuid,
 		Name:  name,
 		Email: email,
+		Role:  role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},

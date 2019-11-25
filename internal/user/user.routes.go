@@ -13,7 +13,6 @@ func Routes(db *sql.DB) chi.Router {
 	InitUserSchema()
 
 	router := chi.NewRouter()
-	router.Get("/", GetUser)
 	router.Post("/signup", SingUp)
 	router.Post("/login", Login)
 
