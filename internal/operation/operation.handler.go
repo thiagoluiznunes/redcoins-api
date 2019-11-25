@@ -53,9 +53,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 // GetByUser :  get operationsByUser handler
 func GetByUser(w http.ResponseWriter, r *http.Request) {
-	userUUID := r.Context().Value("uuid")
+	ctx := r.Context()
+	signature, ok := ctx.Value("signature").(hp.UserSignature)
 
-	operations, err := GetOperationsByUser(userUUID.(string))
+	if !ok || signature.Role == "user" {
+		hp.ResponseHandler(w, r, 403, "Restrict Access")
+		return
+	}
+
+	operations, err := GetOperationsByUser(signature.UUID)
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, err.Error())
 		return
@@ -81,7 +87,14 @@ func GetByUser(w http.ResponseWriter, r *http.Request) {
 
 // GetByDate :  get operationsByDate handler
 func GetByDate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	date := chi.URLParam(r, "date")
+	signature, ok := ctx.Value("signature").(hp.UserSignature)
+
+	if !ok || signature.Role == "user" {
+		hp.ResponseHandler(w, r, 403, "Restrict Access")
+		return
+	}
 
 	operations, err := GetOperationsByDate(date)
 	if err != nil {

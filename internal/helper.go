@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -39,31 +37,6 @@ func ErrorsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// AutorizeMiddleware : middleware to filter unauthorized requests
-func AutorizeMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer ErrorsHandler(w, r)
-
-		header := r.Header.Get("Authorization")
-		if header == "" {
-			ResponseHandler(w, r, 401, "Unauthorized access.")
-			return
-		}
-
-		token := strings.Split(header, "Bearer")[1]
-		isValid, uuid := ValidateToken(strings.TrimSpace(token))
-
-		if isValid {
-			ctx := context.WithValue(r.Context(), "uuid", uuid)
-			// ctx := context.WithValue(r.Context(), "uuid", uuid)
-			next.ServeHTTP(w, r.WithContext(ctx))
-			return
-		}
-		ResponseHandler(w, r, 401, "Unauthorized access.")
-		return
-	})
-}
-
 // GenerateToken : create token
 func GenerateToken(uuid string, name string, email string, role string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
@@ -86,19 +59,22 @@ func GenerateToken(uuid string, name string, email string, role string) (string,
 }
 
 // ValidateToken : verify token validate
-func ValidateToken(token string) (bool, string) {
+func ValidateToken(token string) (bool, UserSignature) {
+	signature := UserSignature{}
 	decode, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 
 	claims := decode.Claims.(jwt.MapClaims)
 	if err != nil {
-		return false, err.Error()
+		return false, signature
 	}
 	if !decode.Valid {
-		return false, err.Error()
+		return false, signature
 	}
-	return true, claims["uuid"].(string)
+	signature.UUID = claims["uuid"].(string)
+	signature.Role = claims["role"].(string)
+	return true, signature
 }
 
 // ResponseHandler : handler
@@ -109,7 +85,7 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request, code int, message s
 	json.NewEncoder(w).Encode(res)
 }
 
-// RequestBitCoinPrice
+// RequestBitCoinPrice : function responsible for request to 3third api
 func RequestBitCoinPrice() (float64, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest", nil)

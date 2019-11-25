@@ -20,6 +20,12 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+// UserSignature : structure to classify autorize middleware user signature
+type UserSignature struct {
+	UUID string
+	Role string
+}
+
 // JSONStandardResponse : structure to classify JSON response
 type JSONStandardResponse struct {
 	Code    int    `json:"code"`

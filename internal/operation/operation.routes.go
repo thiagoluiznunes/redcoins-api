@@ -15,7 +15,7 @@ func Routes(db *sql.DB) chi.Router {
 	InitOperationSchema()
 
 	router := chi.NewRouter()
-	router.Use(hp.AutorizeMiddleware)
+	router.Use(hp.AuthorizeMiddleware)
 	router.Post("/", Create)
 	router.Get("/", GetByUser)
 	router.Get("/{date}", GetByDate)
