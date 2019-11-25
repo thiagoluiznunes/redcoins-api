@@ -18,7 +18,9 @@ func Routes(db *sql.DB) chi.Router {
 	router.Use(hp.AuthorizeMiddleware)
 	router.Post("/", Create)
 	router.Get("/", GetByUser)
-	router.Get("/{date}", GetByDate)
+	router.Get("/date/{date}", GetByDate)
+	router.Get("/email/{email}", GetByEmail)
+	router.Get("/name/{name}", GetByName)
 
 	log.Println("operations: routes registered")
 

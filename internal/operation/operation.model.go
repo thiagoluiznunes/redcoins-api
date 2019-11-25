@@ -2,6 +2,7 @@ package operation
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -58,8 +59,8 @@ func CreateOperation(opt Operation) error {
 	return nil
 }
 
-// GetOperationsByUser : select all operations by user_uuid
-func GetOperationsByUser(uuid string) ([]Operation, error) {
+// GetOperationsByID : select all operations by user_uuid
+func GetOperationsByID(uuid string) ([]Operation, error) {
 	operations := []Operation{}
 	getOperationsQuery := fmt.Sprintf(`SELECT *	FROM operations	WHERE user_uuid = '%s';`, uuid)
 	rows, err := DB.Query(getOperationsQuery)
@@ -83,13 +84,53 @@ func GetOperationsByUser(uuid string) ([]Operation, error) {
 	return operations, nil
 }
 
-// GetOperationsByDate : select all operations by user_uuid
+// GetOperationsByDate : select all operations by date
 func GetOperationsByDate(date string) ([]Operation, error) {
 	operations := []Operation{}
-	getOperationsQuery := fmt.Sprintf(`
-		SELECT * FROM operations
+	getOperationsQuery := fmt.Sprintf(`SELECT * FROM operations
 		WHERE created_at >= '%s 00:00:00' AND created_at <='%s 23:59:59';`, date, date)
 
+	rows, err := DB.Query(getOperationsQuery)
+	if err != nil {
+		return operations, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var opt Operation
+		if err := rows.Scan(&opt.UUID, &opt.OperationType, &opt.Amount, &opt.Price, &opt.CreatedAt, &opt.UserUUID); err != nil {
+			return operations, err
+		}
+		operations = append(operations, opt)
+	}
+
+	if err := rows.Err(); err != nil {
+		return operations, err
+	}
+	return operations, nil
+}
+
+// GetOperationsByParam : retrive all operations by param
+func GetOperationsByParam(param string, data string) ([]Operation, error) {
+	operations := []Operation{}
+	var selectUserQuery string
+	var uuid string
+	switch param {
+	case `email`:
+		selectUserQuery = fmt.Sprintf(`SELECT uuid FROM users	WHERE email = '%s'`, data)
+		row := DB.QueryRow(selectUserQuery).Scan(&uuid)
+		if row == sql.ErrNoRows || uuid == "" {
+			return operations, errors.New("user: User not found")
+		}
+	case `name`:
+		selectUserQuery = fmt.Sprintf(`SELECT uuid FROM users	WHERE name = '%s'`, data)
+		row := DB.QueryRow(selectUserQuery).Scan(&uuid)
+		if row == sql.ErrNoRows || uuid == "" {
+			return operations, errors.New("user: User not found")
+		}
+	}
+
+	getOperationsQuery := fmt.Sprintf(`SELECT *	FROM operations	WHERE user_uuid = '%s';`, uuid)
 	rows, err := DB.Query(getOperationsQuery)
 	if err != nil {
 		return operations, err

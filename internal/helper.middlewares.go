@@ -19,7 +19,6 @@ func AuthorizeMiddleware(next http.Handler) http.Handler {
 
 		token := strings.Split(header, "Bearer")[1]
 		isValid, signature := ValidateToken(strings.TrimSpace(token))
-
 		if isValid {
 			ctx := context.WithValue(r.Context(), "signature", signature)
 			next.ServeHTTP(w, r.WithContext(ctx))

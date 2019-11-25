@@ -11,12 +11,32 @@ import (
 	"github.com/go-chi/chi"
 )
 
+// ResponseOperationsHandler : handler
+func ResponseOperationsHandler(w http.ResponseWriter, r *http.Request, opt JSONOperationsResponse) {
+	var jsonData []byte
+	jsonData, err := json.Marshal(opt)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(opt.Code)
+	w.Write(jsonData)
+}
+
 // Create : get user handler
 func Create(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	userUUID := r.Context().Value("uuid")
 	operationType := r.Form.Get("operation_type")
 	amount, err := strconv.ParseFloat(r.Form.Get("amount"), 64)
+	ctx := r.Context()
+	signature, ok := ctx.Value("signature").(hp.UserSignature)
+
+	if !ok {
+		hp.ResponseHandler(w, r, 403, "Restrict Access")
+		return
+	}
 
 	if operationType != "purchase" && operationType != "sale" {
 		hp.ResponseHandler(w, r, 406, "Invalid operation")
@@ -40,7 +60,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		Amount:        amount,
 		Price:         price,
 		CreatedAt:     ``,
-		UserUUID:      userUUID.(string)})
+		UserUUID:      signature.UUID})
 
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, err.Error())
@@ -56,12 +76,12 @@ func GetByUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	signature, ok := ctx.Value("signature").(hp.UserSignature)
 
-	if !ok || signature.Role == "user" {
+	if !ok {
 		hp.ResponseHandler(w, r, 403, "Restrict Access")
 		return
 	}
 
-	operations, err := GetOperationsByUser(signature.UUID)
+	operations, err := GetOperationsByID(signature.UUID)
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, err.Error())
 		return
@@ -73,16 +93,7 @@ func GetByUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := JSONOperationsResponse{Code: 200, Operations: operations}
-	var jsonData []byte
-	jsonData, err = json.Marshal(res)
-
-	if err != nil {
-		log.Println(err)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(res.Code)
-	w.Write(jsonData)
-	return
+	ResponseOperationsHandler(w, r, res)
 }
 
 // GetByDate :  get operationsByDate handler
@@ -108,14 +119,58 @@ func GetByDate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := JSONOperationsResponse{Code: 200, Operations: operations}
-	var jsonData []byte
-	jsonData, err = json.Marshal(res)
+	ResponseOperationsHandler(w, r, res)
+}
 
-	if err != nil {
-		log.Println(err)
+// GetByEmail :  get operationsByEmail handler
+func GetByEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	email := chi.URLParam(r, "email")
+	signature, ok := ctx.Value("signature").(hp.UserSignature)
+
+	if !ok || signature.Role == "user" {
+		hp.ResponseHandler(w, r, 403, "Restrict Access")
+		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(res.Code)
-	w.Write(jsonData)
+
+	operations, err := GetOperationsByParam("email", email)
+	if err != nil {
+		hp.ResponseHandler(w, r, 406, err.Error())
+		return
+	}
+
+	if len(operations) <= 0 {
+		hp.ResponseHandler(w, r, 404, "Operations not found")
+		return
+	}
+
+	res := JSONOperationsResponse{Code: 200, Operations: operations}
+	ResponseOperationsHandler(w, r, res)
 	return
+}
+
+// GetByName :  get operationsByName handler
+func GetByName(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	name := chi.URLParam(r, "name")
+	signature, ok := ctx.Value("signature").(hp.UserSignature)
+
+	if !ok || signature.Role == "user" {
+		hp.ResponseHandler(w, r, 403, "Restrict Access")
+		return
+	}
+
+	operations, err := GetOperationsByParam("name", name)
+	if err != nil {
+		hp.ResponseHandler(w, r, 406, err.Error())
+		return
+	}
+
+	if len(operations) <= 0 {
+		hp.ResponseHandler(w, r, 404, "Operations not found")
+		return
+	}
+
+	res := JSONOperationsResponse{Code: 200, Operations: operations}
+	ResponseOperationsHandler(w, r, res)
 }
