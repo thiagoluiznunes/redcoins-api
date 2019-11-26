@@ -1,0 +1,28 @@
+version: '3'
+volumes:
+  data:
+services:
+  api:
+    container_name: redcoins
+    build: .
+    ports:
+     - "8000:8000" # http
+    #  - "443:443" # https
+    env_file: .env
+    links:
+      - db
+    depends_on:
+      - db
+  db:
+    image: mysql:latest
+    container_name: mysqldb
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    volumes:
+      - data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_USER: red_user
+      MYSQL_PASSWORD: reduser123
+      MYSQL_DATABASE: red_coins
