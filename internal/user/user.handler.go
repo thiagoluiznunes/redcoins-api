@@ -65,8 +65,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	password := r.Form.Get("password")
-	if !hp.CheckPasswordHash(password, user.Password) {
+	if !hp.CheckPasswordHash(body.Password, user.Password) {
 		hp.ResponseHandler(w, r, 406, "Invalid email/password.")
 		return
 	}
