@@ -91,3 +91,13 @@ func FindUserByEmail(email string) (User, error) {
 	}
 	return user, errors.New("user: Not found")
 }
+
+// DeleteTestUser : describe
+func DeleteTestUser(uuid string) error {
+	_, err := DB.Exec(`	DELETE FROM users	WHERE email = "admin.test@email.com"`)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}

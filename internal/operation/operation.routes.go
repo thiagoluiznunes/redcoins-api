@@ -21,6 +21,7 @@ func Routes(db *sql.DB) chi.Router {
 	router.Get("/date/{date}", GetByDate)
 	router.Get("/email/{email}", GetByEmail)
 	router.Get("/name/{name}", GetByName)
+	router.Delete("/test", DeleteTestOperations)
 
 	log.Println("operations: routes registered")
 

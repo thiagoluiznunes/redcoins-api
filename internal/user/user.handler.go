@@ -81,3 +81,17 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 	return
 }
+
+// DeleteUser : describe
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	signature, _ := ctx.Value("signature").(hp.UserSignature)
+
+	err := DeleteTestUser(signature.UUID)
+	if err != nil {
+		hp.ResponseHandler(w, r, 406, err.Error())
+		return
+	}
+	hp.ResponseHandler(w, r, 200, "user test: deleted")
+	return
+}

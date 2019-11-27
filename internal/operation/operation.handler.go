@@ -27,9 +27,11 @@ func ResponseOperationsHandler(w http.ResponseWriter, r *http.Request, opt JSONO
 
 // Create : get user handler
 func Create(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	operationType := r.Form.Get("operation_type")
-	amount, err := strconv.ParseFloat(r.Form.Get("amount"), 64)
+	var body BodyRequest
+	json.NewDecoder(r.Body).Decode(&body)
+
+	operationType := body.OperationType
+	amount, err := strconv.ParseFloat(body.Amount, 64)
 	ctx := r.Context()
 	signature, ok := ctx.Value("signature").(hp.UserSignature)
 
@@ -173,4 +175,20 @@ func GetByName(w http.ResponseWriter, r *http.Request) {
 
 	res := JSONOperationsResponse{Code: 200, Operations: operations}
 	ResponseOperationsHandler(w, r, res)
+}
+
+// DeleteTestOperations : describe
+func DeleteTestOperations(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	signature, _ := ctx.Value("signature").(hp.UserSignature)
+
+	err := DeleteTestUserOperations(signature.UUID)
+
+	if err != nil {
+		hp.ResponseHandler(w, r, 406, err.Error())
+		return
+	}
+
+	hp.ResponseHandler(w, r, 200, "test operations: deleted")
+	return
 }

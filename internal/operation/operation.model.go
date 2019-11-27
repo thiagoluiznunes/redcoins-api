@@ -9,6 +9,12 @@ import (
 // DB : database instance
 var DB *sql.DB
 
+// BodyRequest : desc
+type BodyRequest struct {
+	OperationType string `json:"operation_type"`
+	Amount        string `json:"amount"`
+}
+
 // Operation : user model
 type Operation struct {
 	UUID          string  `json:"uuid"`
@@ -149,4 +155,15 @@ func GetOperationsByParam(param string, data string) ([]Operation, error) {
 		return operations, err
 	}
 	return operations, nil
+}
+
+// DeleteTestUserOperations : describe
+func DeleteTestUserOperations(uuid string) error {
+	deleteOperationsQuery := fmt.Sprintf(`DELETE FROM operations WHERE user_uuid = "%s";`, uuid)
+	_, err := DB.Exec(deleteOperationsQuery)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }

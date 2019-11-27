@@ -15,6 +15,7 @@ func Routes(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 	router.Post("/signup", SingUp)
 	router.Post("/login", Login)
+	router.Delete("/test", DeleteUser)
 
 	log.Println("users: routes registered")
 
