@@ -13,6 +13,8 @@ COPY . ./
 
 RUN go get github.com/joho/godotenv
 RUN go get github.com/go-chi/chi
+RUN go get github.com/go-chi/render
+RUN go get github.com/go-chi/cors
 RUN go get github.com/go-sql-driver/mysql
 RUN go get github.com/dgrijalva/jwt-go
 RUN go get golang.org/x/crypto/bcrypt
