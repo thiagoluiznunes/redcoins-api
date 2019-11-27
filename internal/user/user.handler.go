@@ -92,6 +92,6 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		hp.ResponseHandler(w, r, 406, err.Error())
 		return
 	}
-	hp.ResponseHandler(w, r, 200, "user test: deleted")
+	hp.ResponseHandler(w, r, 200, "user: deleted")
 	return
 }

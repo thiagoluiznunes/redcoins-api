@@ -189,6 +189,6 @@ func DeleteTestOperations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hp.ResponseHandler(w, r, 200, "test operations: deleted")
+	hp.ResponseHandler(w, r, 200, "operations: deleted")
 	return
 }
