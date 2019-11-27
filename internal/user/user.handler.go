@@ -14,36 +14,37 @@ var passwordRegex = regexp.MustCompile("[a-zA-Z0-9]{6,}")
 
 // SingUp : singup user handler
 func SingUp(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	name := r.Form.Get("name")
-	email := r.Form.Get("email")
-	password := r.Form.Get("password")
-	secret := r.Form.Get("secret")
+	var body BodyRequest
+	json.NewDecoder(r.Body).Decode(&body)
 
-	if !nameRegex.MatchString(name) {
+	if !nameRegex.MatchString(body.Name) {
 		hp.ResponseHandler(w, r, 406, "Invalid name.")
 		return
 	}
-	if !emailRegex.MatchString(email) {
-		hp.ResponseHandler(w, r, 406, "Invalid email")
+	if !emailRegex.MatchString(body.Email) {
+		hp.ResponseHandler(w, r, 406, "Invalid email.")
 		return
 	}
-	if !passwordRegex.MatchString(password) {
+	if !passwordRegex.MatchString(body.Password) {
 		hp.ResponseHandler(w, r, 406, "Invalid password. Must have minimum 6 characters.")
 		return
 	}
+	if body.ConfirmPassword != body.Password {
+		hp.ResponseHandler(w, r, 406, "Passwords diverges.")
+		return
+	}
 
-	hashPassword, err := hp.HashPassword(password)
+	hashPassword, err := hp.HashPassword(body.Password)
 	role := "user"
-	if secret == os.Getenv("JWT_SECRET") {
+	if body.Secret == os.Getenv("JWT_SECRET") {
 		role = "admin"
 	}
 	err = CreateUser(User{
-		uuid:     ``,
-		name:     name,
-		email:    email,
-		password: hashPassword,
-		role:     role})
+		UUID:     ``,
+		Name:     body.Name,
+		Email:    body.Email,
+		Password: hashPassword,
+		Role:     role})
 
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, err.Error())
@@ -55,22 +56,22 @@ func SingUp(w http.ResponseWriter, r *http.Request) {
 
 // Login : login user handler
 func Login(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	email := r.Form.Get("email")
+	var body BodyRequest
+	json.NewDecoder(r.Body).Decode(&body)
 
-	user, err := FindUserByEmail(email)
+	user, err := FindUserByEmail(body.Email)
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, "Invalid email/password.")
 		return
 	}
 
 	password := r.Form.Get("password")
-	if !hp.CheckPasswordHash(password, user.password) {
+	if !hp.CheckPasswordHash(password, user.Password) {
 		hp.ResponseHandler(w, r, 406, "Invalid email/password.")
 		return
 	}
 
-	token, err := hp.GenerateToken(user.uuid, user.name, user.email, user.role)
+	token, err := hp.GenerateToken(user.UUID, user.Name, user.Email, user.Role)
 	if err != nil {
 		hp.ResponseHandler(w, r, 400, err.Error())
 		return

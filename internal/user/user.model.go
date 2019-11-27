@@ -9,13 +9,22 @@ import (
 // DB : database instance
 var DB *sql.DB
 
+// BodyRequest : desc
+type BodyRequest struct {
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+	Secret          string `json:"secret"`
+}
+
 // User : user model
 type User struct {
-	uuid     string
-	name     string
-	email    string
-	password string
-	role     string
+	UUID     string `json:"uuid"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
 }
 
 // InitUserSchema : init table
@@ -38,14 +47,14 @@ func InitUserSchema() {
 // CreateUser : create user in database
 func CreateUser(user User) error {
 	var email string
-	selectUserQuery := fmt.Sprintf("SELECT email FROM users WHERE email = '%s'", user.email)
+	selectUserQuery := fmt.Sprintf("SELECT email FROM users WHERE email = '%s'", user.Email)
 	row := DB.QueryRow(selectUserQuery)
 	err := row.Scan(&email)
 
 	if err == sql.ErrNoRows {
 		insertUserQuery := fmt.Sprintf(`
 			INSERT INTO users (uuid, name, email, password, role)
-			VALUES (UUID(), '%s', '%s', '%s', '%s');`, user.name, user.email, user.password, user.role)
+			VALUES (UUID(), '%s', '%s', '%s', '%s');`, user.Name, user.Email, user.Password, user.Role)
 
 		insert, err := DB.Query(insertUserQuery)
 		insert.Close()
@@ -58,7 +67,7 @@ func CreateUser(user User) error {
 		return err
 	}
 
-	if user.email != "" {
+	if user.Email != "" {
 		return errors.New("user: Already registered")
 	}
 	return errors.New("user: Not found")
@@ -71,13 +80,13 @@ func FindUserByEmail(email string) (User, error) {
 	selectUserQuery := fmt.Sprintf(`SELECT * FROM users	WHERE email = '%s'`, email)
 
 	row := DB.QueryRow(selectUserQuery)
-	err := row.Scan(&user.uuid, &user.name, &user.email, &user.password, &user.role)
+	err := row.Scan(&user.UUID, &user.Name, &user.Email, &user.Password, &user.Role)
 
 	if err == sql.ErrNoRows {
 		return user, errors.New("user: User not found")
 	} else if err != nil {
 		return user, err
-	} else if user.uuid != "" {
+	} else if user.UUID != "" {
 		return user, nil
 	}
 	return user, errors.New("user: Not found")
