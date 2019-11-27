@@ -34,9 +34,9 @@ Ferramentas: Golang | Docker | Docker-compose
 |   CRIAR USUÁRIO          |            |       | `POST`   | /api/v1/users/signup
 |   CRIAR OPERAÇÃO         | Autenticar | User  | `POST`   | /api/v1/operations
 |   BUSCAR OPERAÇÕES       | Autenticar | User  | `GET  `  | /api/v1/operations
-|   BUSCAR OPERAÇÕES       | Autenticar | Admin | `GET`    | /api/v1/users/email
-|   BUSCAR OPERAÇÕES       | Autenticar | Admin | `GET`    | /api/v1/users/date
-|   BUSCAR OPERAÇÕES       | Autenticar | Admin | `GET`    | /api/v1/users/name
+|   BUSCAR OPERAÇÕES       | Autenticar | Admin | `GET`    | /api/v1/operations/email
+|   BUSCAR OPERAÇÕES       | Autenticar | Admin | `GET`    | /api/v1/operations/date
+|   BUSCAR OPERAÇÕES       | Autenticar | Admin | `GET`    | /api/v1/operations/name
 
 <!-- #### AUTENTICAR USUÁRIO ####
 * REQUISIÇÃO
