@@ -16,6 +16,5 @@ func Cors() *cors.Cors {
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	})
-
 	return cors
 }
