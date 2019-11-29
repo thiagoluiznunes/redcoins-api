@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
 
 	hp "redcoins-api/internal"
 )
@@ -64,6 +65,7 @@ func CreateOperation(t *testing.T) {
 func GetOperationByUser(t *testing.T) {
 	var bearer = "Bearer " + UserJWT
 	client := &http.Client{}
+
 	req, err := http.NewRequest("GET", "http://localhost:8000/api/v1/operations", nil)
 	req.Header.Add("Authorization", bearer)
 	if err != nil {
@@ -92,10 +94,47 @@ func GetOperationByUser(t *testing.T) {
 	t.Log("operation: success in getting operations")
 }
 
+// GetOperationByDate : describe
+func GetOperationByDate(t *testing.T) {
+	var bearer = "Bearer " + UserJWT
+	client := &http.Client{}
+	dt := time.Now()
+	fmt.Println(dt.Format("2006-01-02"))
+
+	url := fmt.Sprintf(`http://localhost:8000/api/v1/operations/date/%s`, dt)
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Add("Authorization", bearer)
+	if err != nil {
+		t.Error("operation: failed to create operation get request")
+		return
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Error("operation: failed to request operation get")
+		return
+	}
+	defer resp.Body.Close()
+
+	_, err = ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		t.Error("operation: failed to retrieve response body from operation get by date request")
+		return
+	}
+	if resp.StatusCode == 404 {
+		t.Log("operation: operations not found")
+		return
+	} else if resp.StatusCode != 200 {
+		t.Error("operation: failed to get operations by date")
+	}
+	t.Log("operation: success in getting operations by date")
+}
+
 // DeleteOperation : describe
 func DeleteOperation(t *testing.T) {
 	var bearer = "Bearer " + UserJWT
 	client := &http.Client{}
+
 	req, err := http.NewRequest("DELETE", "http://localhost:8000/api/v1/operations/test", nil)
 	req.Header.Add("Authorization", bearer)
 	if err != nil {

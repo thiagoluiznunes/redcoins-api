@@ -10,6 +10,7 @@ func TestRunner(t *testing.T) {
 	t.Run("Test User Login", UserLogin)
 	t.Run("Test Create Operation", CreateOperation)
 	t.Run("Test Get Operation By User", GetOperationByUser)
+	t.Run("Test Get Operation By Date", GetOperationByDate)
 	t.Run("Test Delete Operation", DeleteOperation)
 	t.Run("Test Delete User", DeleteUser)
 	// <tear-down code>
