@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"testing"
 
 	hp "redcoins-api/internal"
@@ -14,7 +13,7 @@ import (
 
 // UserSignUp : describe
 func UserSignUp(t *testing.T) {
-	secret := os.Getenv("JWT_SECRET")
+	secret := "Red_C0ins123"
 	user, err := json.Marshal(map[string]string{
 		"name":             "Admin test",
 		"email":            "admin.test@email.com",

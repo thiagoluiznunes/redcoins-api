@@ -11,6 +11,7 @@ var DB *sql.DB
 
 // BodyRequest : desc
 type BodyRequest struct {
+	Email         string `json:"email"`
 	OperationType string `json:"operation_type"`
 	Amount        string `json:"amount"`
 }
@@ -124,6 +125,7 @@ func GetOperationsByParam(param string, data string) ([]Operation, error) {
 	switch param {
 	case `email`:
 		selectUserQuery = fmt.Sprintf(`SELECT uuid FROM users	WHERE email = '%s'`, data)
+		fmt.Println(selectUserQuery)
 		row := DB.QueryRow(selectUserQuery).Scan(&uuid)
 		if row == sql.ErrNoRows || uuid == "" {
 			return operations, errors.New("user: User not found")

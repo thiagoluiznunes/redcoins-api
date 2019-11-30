@@ -126,8 +126,10 @@ func GetByDate(w http.ResponseWriter, r *http.Request) {
 
 // GetByEmail :  get operationsByEmail handler
 func GetByEmail(w http.ResponseWriter, r *http.Request) {
+	var body BodyRequest
+	json.NewDecoder(r.Body).Decode(&body)
+
 	ctx := r.Context()
-	email := chi.URLParam(r, "email")
 	signature, ok := ctx.Value("signature").(hp.UserSignature)
 
 	if !ok || signature.Role == "user" {
@@ -135,7 +137,7 @@ func GetByEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	operations, err := GetOperationsByParam("email", email)
+	operations, err := GetOperationsByParam("email", body.Email)
 	if err != nil {
 		hp.ResponseHandler(w, r, 406, err.Error())
 		return

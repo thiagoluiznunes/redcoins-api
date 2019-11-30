@@ -18,8 +18,8 @@ func Routes(db *sql.DB) chi.Router {
 	router.Use(hp.AuthorizeMiddleware)
 	router.Post("/", Create)
 	router.Get("/", GetByUser)
+	router.Post("/email", GetByEmail)
 	router.Get("/date/{date}", GetByDate)
-	router.Get("/email/{email}", GetByEmail)
 	router.Get("/name/{name}", GetByName)
 	router.Delete("/test", DeleteTestOperations)
 
