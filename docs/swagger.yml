@@ -1,0 +1,109 @@
+swagger: "2.0"
+info:
+  version: "1.0"
+  title: Red Coins API
+  contact:
+    email: "thiagoluiz.dev@gmail.com"
+
+basePath: /api/v1/
+
+consumes:
+- application/json
+produces:
+- application/json
+schemes:
+- http
+
+host: localhost:8000
+paths:
+  /users/login:
+    post:
+      tags:
+        - user
+      description: User Login
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/login-request"
+      responses:
+        200:
+          description: Logged
+          schema:
+            $ref: "#/definitions/login-response"
+        406:
+          description: Invalid email/password
+          schema:
+            $ref: "#/definitions/error"
+        400:
+          description: Fail to generete token
+          schema:
+            $ref: "#/definitions/error"
+  /users/signup:
+    post:
+      tags:
+        - user
+      description: User Signup
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/signup-request"
+      responses:
+        201:
+          description: User registered with success.
+        406:
+          description: Invalid field or user already registered.
+          schema:
+            $ref: "#/definitions/error"
+
+definitions:
+  login-request:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+  login-response:
+    type: object
+    required:
+      - code
+      - jwt
+    properties:
+      code:
+        type: integer
+      jwt:
+        type: string
+  signup-request:
+    type: object
+    required:
+      - name
+      - email
+      - password
+      - confirm_password
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      confirm_password:
+        type: string
+      secret:
+        type: string
+  error:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
