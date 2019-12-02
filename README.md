@@ -19,10 +19,9 @@ Ferramentas: Golang | Docker | Docker-compose
 
 **Obs.: As seguintes instruções foram testadas na distribuição do Ubuntu 18.04 Bionic**
 
-1 - Depois de clonar o repositório 'git clone' (comando), execute os seguintes comandos para criar as imagens docker "redcoins-api" e "mysqldb":
+1 - Depois de clonar o repositório 'git clone' (comando), execute os seguintes comandos para criar as imagens docker "redcoins-api", "mysqldb" e "swagger-ui":
   - user@user:~/diretorio_projeto_clonado/$ **docker-compose up -d**
-  - certifique-se se as portas :8000 e :3306 estão liberadas
-  -
+  - certifique-se se as portas :8000, :8001 e :3306 estão liberadas
 
 2 - Execução dos testes unitários
   - use@user:~/diretorio_projeto_clonado/ **go test ./... -v**

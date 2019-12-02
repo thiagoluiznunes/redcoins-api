@@ -14,6 +14,12 @@ produces:
 schemes:
 - http
 
+securityDefinitions:
+  bearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+
 host: localhost:8000
 paths:
   /users/login:
@@ -53,7 +59,139 @@ paths:
         201:
           description: User registered with success.
         406:
-          description: Invalid field or user already registered.
+          description: Invalid fields or user already registered.
+          schema:
+            $ref: "#/definitions/error"
+  /operations:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - operations
+      description: Create Operation purchase/sale. Needs be authorized via Login.
+      parameters:
+        - name: body
+          in: body
+          enum: [purchase, sale]
+          schema:
+            $ref: "#/definitions/create-operation-request"
+      responses:
+        200:
+          description: Operation successfully performed.
+        401:
+          description: Unauthorized Access.
+          schema:
+            $ref: "#/definitions/error"
+        403:
+          description: Restrict Access.
+          schema:
+            $ref: "#/definitions/error"
+        406:
+          description: Invalid operation_type/amount.
+          schema:
+            $ref: "#/definitions/error"
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - operations
+      description: Get Operations by User. Needs be authorized via Login.
+      responses:
+        200:
+          description: All operations.
+        401:
+          description: Unauthorized Access.
+          schema:
+            $ref: "#/definitions/error"
+        403:
+          description: Restrict Access.
+          schema:
+            $ref: "#/definitions/error"
+  /operations/date/{date}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - operations
+      description: Get Operations by Date. Needs be authorized via Admin Login.
+      parameters:
+        - in: path
+          name: date
+          schema:
+            type: string
+          required: true
+          description: "Operations date. Example: 2019-11-30"
+
+      responses:
+        200:
+          description: All operations.
+        401:
+          description: Unauthorized Access.
+          schema:
+            $ref: "#/definitions/error"
+        403:
+          description: Restrict Access.
+          schema:
+            $ref: "#/definitions/error"
+        404:
+          description: Operations not found.
+          schema:
+            $ref: "#/definitions/error"
+  /operations/name/{name}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - operations
+      description: Get Operations by Name. Needs be authorized via Admin Login.
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+          description: "Operations Name. Example: Admin User"
+
+      responses:
+        200:
+          description: All operations.
+        401:
+          description: Unauthorized Access.
+          schema:
+            $ref: "#/definitions/error"
+        403:
+          description: Restrict Access.
+          schema:
+            $ref: "#/definitions/error"
+        404:
+          description: Operations not found.
+          schema:
+            $ref: "#/definitions/error"
+  /operations/email:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - operations
+      description: Get Operations by Email. Needs be authorized via Admin Login.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/post-operationsByEmail-request"
+      responses:
+        200:
+          description: All operations.
+        401:
+          description: Unauthorized Access.
+          schema:
+            $ref: "#/definitions/error"
+        403:
+          description: Restrict Access.
+          schema:
+            $ref: "#/definitions/error"
+        404:
+          description: Operations not found.
           schema:
             $ref: "#/definitions/error"
 
@@ -95,6 +233,29 @@ definitions:
       confirm_password:
         type: string
       secret:
+        type: string
+  create-operation-request:
+    type: object
+    required:
+      - operation_type
+      - amount
+    properties:
+      operation_type:
+        type: string
+        examples:
+          purchase:
+            value: purchase
+          sale:
+            value: sale
+      amount:
+        type: string
+        example: "150"
+  post-operationsByEmail-request:
+    type: object
+    required:
+      - email
+    properties:
+      email:
         type: string
   error:
     type: object

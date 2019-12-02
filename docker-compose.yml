@@ -27,3 +27,15 @@ services:
       MYSQL_USER: red_user
       MYSQL_PASSWORD: reduser123
       MYSQL_DATABASE: red_coins
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    ports:
+    - "8001:8080"
+    volumes:
+      - ./docs/swagger.yml:/swagger.yml
+    environment:
+      SWAGGER_JSON: /swagger.yml
+    links:
+      - api
+      - db
