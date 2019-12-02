@@ -10,7 +10,7 @@ Ferramentas: Golang | Docker | Docker-compose
 
 ### Requerimentos ###
 
-É necessário que a instalação prévia do Docker e do Docker-compose
+É necessário a instalação prévia do Docker e do Docker-compose
 
 * **[Docker 19.03.x](https://docs.docker.com)** :white_check_mark:
 * **[Docker compose 1.24.x](https://docs.docker.com/compose/)** :white_check_mark:
