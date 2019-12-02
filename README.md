@@ -68,7 +68,7 @@ POST /api/v1/users/signup
   "email": "user@gmail.com",
   "password": "user123",
   "confirm_password": "user123",
-  "secret": "" // Opicional, caso queira criar uma usuário Admin
+  "secret": "" // Para criação de usuário Admin
 }
 ```
 * RESPOSTA
