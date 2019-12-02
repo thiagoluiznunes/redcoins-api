@@ -85,7 +85,7 @@ POST /api/v1/operations
 ```
 ```json
 {
-  "operation_type": "purchase", // purchar ou sale
+  "operation_type": "purchase", // purchase ou sale
   "amount": "150",
 }
 ```
